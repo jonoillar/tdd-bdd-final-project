@@ -26,10 +26,12 @@ While debugging just these tests it's convenient to use this:
 import os
 import logging
 import unittest
+from random import randint
 from decimal import Decimal
-from service.models import Product, Category, db
+from service.models import Product, Category, db, DataValidationError
 from service import app
 from tests.factories import ProductFactory
+
 
 DATABASE_URI = os.getenv(
     "DATABASE_URI", "postgresql://postgres:postgres@localhost:5432/postgres"
@@ -117,3 +119,100 @@ class TestProductModel(unittest.TestCase):
         self.assertEqual(new_product.available, product.available)
         self.assertEqual(new_product.id, product.id)
 
+    def test_update_a_product(self):
+        """It should update a product"""
+        product = ProductFactory()
+        product.id = None
+        product.create()
+        original_product_id = product.id
+        fake_description = "fake description"
+        product.description = "fake description"
+        product.update()
+        self.assertEqual(product.description, fake_description)
+        new_product = Product.find(original_product_id)
+        self.assertEqual(new_product.description, fake_description)
+
+    def test_sad_path_update_a_product(self):
+        """It should fail to update a product"""
+        product = ProductFactory()
+        product.id = None
+        with self.assertRaises(DataValidationError):
+            product.update()
+
+    def test_delete_a_product(self):
+        """It should delete a product"""
+        product = ProductFactory()
+        product.id = None
+        product.create()
+        products = Product.all()
+        self.assertEqual(len(products), 1)
+        product.delete()
+        products = Product.all()
+        self.assertEqual(len(products), 0)
+
+    def test_list_products(self):
+        """It should list all products"""
+        products = Product.all()
+        self.assertEqual(len(products), 0)
+        # Create between 1 and 10 products
+        number_products = randint(1, 10)
+        fake_products = ProductFactory.create_batch(number_products)
+        for k in fake_products:
+            k.create()
+        products = Product.all()
+        self.assertEqual(len(products), number_products)
+
+    def test_find_by_name(self):
+        """It should find a product by its name"""
+        fake_products = ProductFactory.create_batch(5)
+        for k in fake_products:
+            k.create()
+        first_name_fake_products: str = fake_products[0].name
+        same_name_products_number: int = len([k for k in fake_products if k.name == first_name_fake_products])
+        database_products = Product.find_by_name(first_name_fake_products)
+        self.assertEqual(database_products.count(), same_name_products_number)
+        for k in database_products:
+            self.assertEqual(k.name, first_name_fake_products)
+
+    def test_find_by_availability(self):
+        """It should find a product by its availability"""
+        fake_products = ProductFactory.create_batch(10)
+        for k in fake_products:
+            k.create()
+        availability: str = fake_products[0].available
+        count: int = len([k for k in fake_products if k.available == availability])
+        database_products = Product.find_by_availability(availability)
+        self.assertEqual(database_products.count(), count)
+        for k in database_products:
+            self.assertEqual(k.available, availability)
+
+    def test_find_by_category(self):
+        """It should find a product by its category"""
+        fake_products = ProductFactory.create_batch(10)
+        for k in fake_products:
+            k.create()
+        category: str = fake_products[0].category
+        count: int = len([k for k in fake_products if k.category == category])
+        database_products = Product.find_by_category(category)
+        self.assertEqual(database_products.count(), count)
+        for k in database_products:
+            self.assertEqual(k.category, category)
+
+    def test_find_by_price(self):
+        """It should find a product by its category"""
+        fake_products = ProductFactory.create_batch(10)
+        for k in fake_products:
+            k.create()
+        price: str = fake_products[0].price
+        count: int = len([k for k in fake_products if k.price == price])
+        database_products = Product.find_by_price(price)
+        self.assertEqual(database_products.count(), count)
+        for k in database_products:
+            self.assertEqual(k.price, price)
+
+        # Find by string price
+        str_price = str(price)
+        database_products = Product.find_by_price(str_price)
+        self.assertEqual(database_products.count(), count)
+        for k in database_products:
+            self.assertEqual(k.price, Decimal(str_price))
