@@ -200,6 +200,7 @@ class Product(db.Model):
         :rtype: list
 
         """
+        # Note: the return type is not list but Query
         logger.info("Processing name query for %s ...", name)
         return cls.query.filter(cls.name == name)
 
