@@ -26,8 +26,10 @@ Test cases can be run with the following:
 """
 import os
 import logging
+from random import randint
 from decimal import Decimal
 from unittest import TestCase
+from urllib.parse import quote_plus
 from service import app
 from service.common import status
 from service.models import db, init_db, Product
@@ -205,6 +207,37 @@ class TestProductRoutes(TestCase):
         """It should fail to delete a Product"""
         response = self.client.delete(f"{BASE_URL}/0")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+    
+    def test_list_all(self):
+        number_products = randint(1, 10)
+        test_products = self._create_products(number_products)
+        response = self.client.get(BASE_URL)
+        self.assertEqual(len(response.get_json()), number_products)
+    
+    def test_list_by_name(self):
+        number_products = randint(1,10)
+        all_products = self._create_products(number_products)
+        name = all_products[0].name
+        count = len([k for k in all_products if k.name == name])
+        response = self.client.get(BASE_URL, query_string=f"name={quote_plus(name)}")
+        self.assertEqual(len(response.get_json()), count)
+    
+    def test_list_by_category(self):
+        number_products = randint(1,10)
+        all_products = self._create_products(number_products)
+        category = all_products[0].category
+        count = len([k for k in all_products if k.category == category])
+        response = self.client.get(BASE_URL, query_string=f"category={quote_plus(category.name)}")
+        self.assertEqual(len(response.get_json()), count)
+
+    def test_list_by_availability(self):
+        number_products = randint(1,10)
+        all_products = self._create_products(number_products)
+        availability = all_products[0].available
+        count = len([k for k in all_products if k.available == availability])
+        response = self.client.get(BASE_URL, query_string=f"availability={str(availability)}")
+        self.assertEqual(len(response.get_json()), count)
+
 
     ######################################################################
     # Utility functions

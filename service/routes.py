@@ -18,6 +18,7 @@
 """
 Product Store Service with UI
 """
+from service.models import Product, Category
 from flask import jsonify, request, abort
 from flask import url_for  # noqa: F401 pylint: disable=unused-import
 from service.models import Product
@@ -172,4 +173,27 @@ def delete_products(product_id):
         abort(status.HTTP_404_NOT_FOUND)
     product.delete()
 
-    return {}, status.HTTP_204_NO_CONTENT
+    return "", status.HTTP_204_NO_CONTENT
+
+@app.route("/products", methods=["GET"])
+def list_products():
+    """
+    Lists Products
+    """
+    app.logger.info("Request to list Products...")
+    name = request.args.get("name")
+    category = request.args.get("category")
+    availability = request.args.get("availability")
+    if name:
+        products = Product.find_by_name(name)
+    elif category:
+        category_value = getattr(Category, category.upper())
+        products = Product.find_by_category(category_value)
+    elif availability:
+        availability_value = availability=="True"
+        products = Product.find_by_availability(availability_value)
+    else:
+        products = Product.all()
+    list_products = [k.serialize() for k in products]
+
+    return jsonify(list_products), status.HTTP_200_OK
