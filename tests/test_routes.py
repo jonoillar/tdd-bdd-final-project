@@ -176,6 +176,35 @@ class TestProductRoutes(TestCase):
         """It should fail to find a Product"""
         response = self.client.get(f"{BASE_URL}/0")
         self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+    
+    def test_update_a_product(self):
+        """It should update a product"""
+        test_product = self._create_products(1)[0]
+        new_name = "fake_new_name"
+        test_product.name = new_name
+        response = self.client.put(f"{BASE_URL}/{test_product.id}", json=test_product.serialize())
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        test_product_output = response.get_json()
+        self.assertEqual(test_product_output["name"], new_name)
+
+    def test_update_a_product_not_found(self):
+        """It should fail to find a Product"""
+        response = self.client.put(f"{BASE_URL}/0", json={})
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_delete_product(self):
+        """It should Delete a Product"""
+        test_product = self._create_products(1)[0]
+        response = self.client.delete(f"{BASE_URL}/{test_product.id}")
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
+        # Now check if the product is deleted
+        response = self.client.get(f"{BASE_URL}/{test_product.id}")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
+
+    def test_delete_product_not_found(self):
+        """It should fail to delete a Product"""
+        response = self.client.delete(f"{BASE_URL}/0")
+        self.assertEqual(response.status_code, status.HTTP_404_NOT_FOUND)
 
     ######################################################################
     # Utility functions
