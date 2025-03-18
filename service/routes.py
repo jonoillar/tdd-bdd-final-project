@@ -18,10 +18,10 @@
 """
 Product Store Service with UI
 """
-from service.models import Product, Category
+
 from flask import jsonify, request, abort
 from flask import url_for  # noqa: F401 pylint: disable=unused-import
-from service.models import Product
+from service.models import Product, Category
 from service.common import status  # HTTP Status Codes
 from . import app
 
@@ -87,7 +87,6 @@ def create_products():
 
     message = product.serialize()
 
-
     location_url = url_for("get_products", product_id=product.id, _external=True)
     return jsonify(message), status.HTTP_201_CREATED, {"Location": location_url}
 
@@ -130,6 +129,7 @@ def get_products(product_id):
 #
 # PLACE YOUR CODE TO UPDATE A PRODUCT HERE
 #
+
 
 @app.route("/products/<int:product_id>", methods=["PUT"])
 def update_products(product_id):
@@ -175,6 +175,7 @@ def delete_products(product_id):
 
     return "", status.HTTP_204_NO_CONTENT
 
+
 @app.route("/products", methods=["GET"])
 def list_products():
     """
@@ -190,10 +191,10 @@ def list_products():
         category_value = getattr(Category, category.upper())
         products = Product.find_by_category(category_value)
     elif availability:
-        availability_value = availability=="True"
+        availability_value = availability == "True"
         products = Product.find_by_availability(availability_value)
     else:
         products = Product.all()
-    list_products = [k.serialize() for k in products]
+    list_of_products = [k.serialize() for k in products]
 
-    return jsonify(list_products), status.HTTP_200_OK
+    return jsonify(list_of_products), status.HTTP_200_OK
