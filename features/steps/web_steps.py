@@ -63,6 +63,7 @@ def step_impl(context, text, element_name):
     element = Select(context.driver.find_element(By.ID, element_id))
     element.select_by_visible_text(text)
 
+
 @then('I should see "{text}" in the "{element_name}" dropdown')
 def step_impl(context, text, element_name):
     element_id = ID_PREFIX + element_name.lower().replace(' ', '_')
@@ -151,9 +152,6 @@ def step_impl(context, name):
 @then('I should not see "{name}" in the results')
 def step_impl(context, name):
     element = context.driver.find_element_by_id('search_results')
-    print("kaaaaaaaaa")
-    print(element.text)
-    print("end kaaaaa")
     assert(name not in element.text)
 
 @then('I should see the message "{message}"')
