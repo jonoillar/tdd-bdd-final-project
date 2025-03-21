@@ -185,15 +185,22 @@ def list_products():
     name = request.args.get("name")
     category = request.args.get("category")
     availability = request.args.get("availability")
+
+    app.logger.info(f"DEBUG: Query params - name: {name}, category: {category}, availability: {availability}")
+
     if name:
+        app.logger.info("List by names...")
         products = Product.find_by_name(name)
     elif category:
+        app.logger.info("List by category...")
         category_value = getattr(Category, category.upper())
         products = Product.find_by_category(category_value)
     elif availability:
+        app.logger.info("List by availability...")
         availability_value = availability == "True"
         products = Product.find_by_availability(availability_value)
     else:
+        app.logger.info("List ALL products...")
         products = Product.all()
     list_of_products = [k.serialize() for k in products]
 
