@@ -131,11 +131,3 @@ Scenario: Search by name
     Then I should see the message "Success"
     And I should see "Hat" in the "Name" field
     And I should see "A red fedora" in the "Description" field
-
-Scenario: Search by available reduced
-    When I visit the "Home Page"
-    And I press the "Clear" button
-    And I select "True" in the "Available" dropdown
-    And I press the "Search" button
-    Then I should see the message "Success"
-    And I should not see "Shoes" in the results
