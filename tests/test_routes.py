@@ -238,7 +238,7 @@ class TestProductRoutes(TestCase):
         all_products = self._create_products(number_products)
         availability = all_products[0].available
         count = len([k for k in all_products if k.available == availability])
-        response = self.client.get(BASE_URL, query_string=f"availability={str(availability)}")
+        response = self.client.get(BASE_URL, query_string=f"available={str(availability)}")
         self.assertEqual(len(response.get_json()), count)
 
     ######################################################################

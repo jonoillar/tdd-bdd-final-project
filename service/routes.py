@@ -184,9 +184,9 @@ def list_products():
     app.logger.info("Request to list Products...")
     name = request.args.get("name")
     category = request.args.get("category")
-    availability = request.args.get("availability")
+    available = request.args.get("available")
 
-    app.logger.info(f"DEBUG: Query params - name: {name}, category: {category}, availability: {availability}")
+    app.logger.info(f"DEBUG: Query params - name: {name}, category: {category}, available: {available}")
 
     if name:
         app.logger.info("List by names...")
@@ -195,10 +195,10 @@ def list_products():
         app.logger.info("List by category...")
         category_value = getattr(Category, category.upper())
         products = Product.find_by_category(category_value)
-    elif availability:
-        app.logger.info("List by availability...")
-        availability_value = availability == "True"
-        products = Product.find_by_availability(availability_value)
+    elif available:
+        app.logger.info("List by available...")
+        available_value = available.lower() in ["true", "yes", "1"]
+        products = Product.find_by_availability(available_value)
     else:
         app.logger.info("List ALL products...")
         products = Product.all()
